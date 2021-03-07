@@ -1,0 +1,59 @@
+<%- include('shared/header.ejs') %>
+
+
+    <div class="container text-center my-3">
+        <div class="user my-3">
+            <i class="far fa-edit user-icon"></i>
+            <h1 class="logo">Sarahah</h1>
+            <p class="mb-6 text-center text-muted">
+                Register
+            </p>
+        </div>
+        <div class="card p-5 w-50 m-auto">
+            <form method="POST" action="/handleRegister">
+                <input value="<%= oldInputs.name %>" class="form-control" placeholder="Enter your Name" type="text" name="name">
+                <% if (errors.find(e=>e.param == 'name')) { %>
+                    <small class="alert alert-danger text-center float-left">
+                        Name is required and only letters are allowed
+                    </small>
+                <% } %>
+
+                <input value="<%= oldInputs.email%>" class="form-control mt-3" placeholder="Enter your email" type="email" name="email">
+                <% if (errors.find(e=>e.param == 'email')) { %>
+                    <small class="alert alert-danger text-center float-left">
+                        Email is required
+                    </small>
+                <% } %>
+                <% if (errors.find(e => e == 'emailExists')) { %>
+                    <small class="alert alert-danger text-center float-left">
+                        Email is already registered! <a href="/login">Login?</a>
+                    </small>
+                <% } %>
+
+                <div style="position: relative;">
+                    <input id="password-field" value="<%= oldInputs.password %>" class="form-control mt-3" placeholder="Enter your Password" type="password" name="password">
+                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                    <% if (errors.find(e=>e.param == 'password')) { %>
+                        <small class="alert alert-danger text-center float-left">
+                            Password is required
+                        </small>
+                    <% } %>
+                </div>
+
+                <div style="position: relative;">
+                    <input id="repassword-field" class="form-control mt-3" placeholder="Password Confirmation" type="password" name="PasswordConfirmation">
+                    <span toggle="#repassword-field" class="fa fa-fw fa-eye field-icon toggle-repassword"></span>
+                    <% if (errors.find(e=>e.param == 'PasswordConfirmation')) { %>
+                        <small class="alert alert-danger text-center float-left">
+                            Passwords aren't matched!
+                        </small>
+                    <% } %>
+                </div>
+
+                <button class="btn btn-default-outline my-4 w-100 rounded">Register</button>
+                <a class="btn btn-default-outline mx-auto" href="/login">Login</a>
+            </form>
+        </div>
+    </div>
+
+    <%- include('shared/footer.ejs') %>
