@@ -6,9 +6,10 @@ var session = require('express-session')
 var MongoDBStore = require('connect-mongodb-session')(session);
 var flash = require('connect-flash');
 var store = new MongoDBStore({
-    uri: 'mongodb+srv://Zook:admin@cluster0.dcakn.mongodb.net/sarahah',
+    uri: 'mongodb+srv://zookdb_db_user:0UIku8VhrH0pCdYZ@cluster0.lmgjdnw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
     collection: 'mySessions'
 });
+
 app.use(session({
     secret: 'keyboard cat',
     resave: false,
@@ -33,7 +34,7 @@ app.get('/logout', (req, res) => {
         res.redirect('/')
     })
 });
-mongoose.connect('mongodb+srv://Zook:admin@cluster0.dcakn.mongodb.net/sarahah',
+mongoose.connect('mongodb+srv://zookdb_db_user:0UIku8VhrH0pCdYZ@cluster0.lmgjdnw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
     {
         useNewUrlParser: true, 
         useUnifiedTopology: true, 
