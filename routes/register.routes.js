@@ -17,7 +17,7 @@ require('dotenv').config();
 // });
 let transporter = nodemailer.createTransport(sendgridTransport({
     auth: {
-        api_key:`${process.env.sendGridApiKey}`
+        api_key:`${process.env.SENDGRID_API_KEY}`
     },
 }));
 
@@ -32,30 +32,41 @@ app.get('/register', (req, res) => {
 app.post('/handleRegister', validation,
     async(req, res) => {
         const errors = validationResult(req)
-        console.log(errors.array());
-        // console.log(errors.isEmpty());
-        console.log(req.body);
         const { name, email, password } = req.body
         if (errors.isEmpty()) {
             const user = await userModel.findOne({email});
             if (user == null) {
-                console.log(user);
                 bcrypt.hash(password, 8, async function(err, hash) {
-                    var token = jwt.sign({email}, 'shhhhh', { expiresIn: 60 * 5 });
-                    let info = await transporter.sendMail({
-                        from: '"Sarahah" <zookdb@gmail.com>', // sender address
-                        to: email, // list of receivers
-                        subject: "No Reply: Email Verification ✔", // Subject line
-                        html: `
-                        <h2>This is an automated message!</h2>
-                        <br>
-                        <b>Your Email is:</b> <span>${email}</span>
-                        <br>
-                        <a href="https://sarahahapp.herokuapp.com/verify/${token}">Click to verify your Email</a>
-                        `,
-                    });
-                    await userModel.insertMany({ name, email, password: hash, imgURL: '/img/userDefault.jpg'})
-                    res.redirect('/emailverification')
+                    if (err) {
+                        console.error('Password hashing error:', err);
+                        req.flash('errors', 'Registration failed. Please try again.');
+                        return res.redirect('/register');
+                    }
+                    
+                    try {
+                        var token = jwt.sign({email}, 'shhhhh', { expiresIn: 60 * 5 });
+                        const baseUrl = process.env.NODE_ENV === 'production' 
+                            ? 'https://sarahah.zook.blog' 
+                            : 'http://localhost:3030';
+                        
+                        let info = await transporter.sendMail({
+                            from: '"Sarahah" <zookdb@gmail.com>', // sender address
+                            to: email, // list of receivers
+                            subject: "No Reply: Email Verification ✔", // Subject line
+                            html: `
+                            <h2>This is an automated message!</h2>
+                            <br>
+                            <b>Your Email is:</b> <span>${email}</span>
+                            <br>
+                            <a href="${baseUrl}/verify/${token}">Click to verify your Email</a>
+                            `,
+                        });
+                        await userModel.insertMany({ name, email, password: hash, imgURL: '/img/userDefault.jpg'})
+                        res.redirect('/emailverification')
+                    } catch (emailError) {
+                        req.flash('errors', 'Failed to send verification email. Please try again.');
+                        res.redirect('/register');
+                    }
                 });
             } else {
                 req.flash('errors', 'emailExists')
@@ -69,13 +80,15 @@ app.post('/handleRegister', validation,
         }
 });
 
-app.get('/verify/:token', (req, res) => {
-    let token = req.params.token
-    let decoded = jwt.verify(token, 'shhhhh');
-    jwt.verify(token, 'shhhhh', async function(err, decoded) {
-        console.log(decoded.email);
-        await userModel.findOneAndUpdate({email: decoded.email}, {emailVerification: true})
-    });
-    res.redirect('/login')
+app.get('/verify/:token', async (req, res) => {
+    let token = req.params.token;
+    try {
+        let decoded = jwt.verify(token, 'shhhhh');
+        await userModel.findOneAndUpdate({email: decoded.email}, {emailVerification: true});
+        req.flash('success', 'Email verified successfully! You can now log in.');
+    } catch (err) {
+        req.flash('errors', 'Invalid or expired verification link.');
+    }
+    res.redirect('/login');
 });
 module.exports = app

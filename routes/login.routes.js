@@ -7,10 +7,8 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/handleLogin', async(req, res) => {
-    console.log(req.body);
     const { email, password } = req.body
     const user = await userModel.findOne({ email })
-    console.log(user);
     if (user == null) {
         res.redirect('/login')
     } else {

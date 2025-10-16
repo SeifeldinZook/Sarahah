@@ -16,7 +16,7 @@ require('dotenv').config();
 // });
 let transporter = nodemailer.createTransport(sendgridTransport({
   auth: {
-      api_key:`${process.env.sendGridApiKey}`
+      api_key:`${process.env.SENDGRID_API_KEY}`
   },
 }));
 
@@ -69,9 +69,6 @@ app.post('/handleResetPassword',
     let decoded = jwt.verify(token, 'shhhhh');
     let user = await userModel.findOne({email: decoded.email});
 
-    console.log(user)
-    console.log(error.array());
-    console.log(newPassword);
     if (error.isEmpty()) {
       bcrypt.hash(newPassword, 7, async (err, hash) => {
         await userModel.findOneAndUpdate({email: decoded.email}, {password: hash})
