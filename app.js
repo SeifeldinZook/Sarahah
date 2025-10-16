@@ -6,6 +6,15 @@ var session = require('express-session')
 var MongoDBStore = require('connect-mongodb-session')(session);
 var flash = require('connect-flash');
 
+// Load .env file FIRST before any other operations
+const envPath = path.join(__dirname, 'config/.env');
+const result = require('dotenv').config({ path: envPath });
+if (result.error) {
+    console.error('Error loading .env file:', result.error);
+} else {
+    console.log('Environment configuration loaded successfully');
+}
+
 // Winston logging imports
 const { createLogger, format, transports } = require('winston');
 const fs = require('fs');
@@ -89,15 +98,7 @@ console.error = function (message, ...args) {
     logger.error(message, ...args);
 };
 
-// Check if .env file exists and read its content
-const envPath = path.join(__dirname, 'config/.env');
-// Load .env file
-const result = require('dotenv').config({ path: envPath });
-if (result.error) {
-    console.error('Error loading .env file:', result.error);
-} else {
-    logger.info('Environment configuration loaded successfully');
-}
+// .env file already loaded at the beginning of the file
 
 // Normalize port
 const normalizePort = require('normalize-port');
