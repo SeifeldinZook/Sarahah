@@ -17,10 +17,23 @@ if (!fs.existsSync(logDir)) {
 }
 
 // Environment-specific database configuration
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production' || 
+                     process.env.ENVIRONMENT === 'production' ||
+                     process.env.APP_ENV === 'production';
 const dbSuffix = isProduction ? 'prod' : 'dev';
 const sessionDbName = `sarahah_sessions_${dbSuffix}`;
 const appDbName = `sarahah_app_${dbSuffix}`;
+
+// Debug logging for environment detection
+console.log('Environment Detection Debug:', {
+    NODE_ENV: process.env.NODE_ENV,
+    ENVIRONMENT: process.env.ENVIRONMENT,
+    APP_ENV: process.env.APP_ENV,
+    isProduction: isProduction,
+    dbSuffix: dbSuffix,
+    sessionDbName: sessionDbName,
+    appDbName: appDbName
+});
 
 var store = new MongoDBStore({
     uri: `mongodb+srv://zookdb_db_user:0UIku8VhrH0pCdYZ@cluster0.lmgjdnw.mongodb.net/${sessionDbName}?retryWrites=true&w=majority&appName=Cluster0&ssl=true&tlsAllowInvalidCertificates=true`,
